@@ -16,6 +16,13 @@ if (isset($_POST['add_antrian'])) {
     $id_pasien = $_POST['id_pasien'];
     $id_poli = $_POST['id_poli'];
     $id_dokter = $_POST['id_dokter'];
+
+    // Vital Signs
+    $tensi = $_POST['tensi'];
+    $bb = $_POST['bb'];
+    $tb = $_POST['tb'];
+    $suhu = $_POST['suhu'];
+
     $tanggal = date('Y-m-d');
 
     // Get Last Queue Number
@@ -23,7 +30,7 @@ if (isset($_POST['add_antrian'])) {
     $last = mysqli_fetch_assoc($check);
     $no_antrian = ($last ? $last['no_antrian'] : 0) + 1;
 
-    $query = "INSERT INTO antrian (id_pasien, id_poli, id_dokter, tanggal, no_antrian, status) VALUES ('$id_pasien', '$id_poli', '$id_dokter', '$tanggal', '$no_antrian', 'Menunggu')";
+    $query = "INSERT INTO antrian (id_pasien, id_poli, id_dokter, tanggal, no_antrian, status, tensi, berat_badan, tinggi_badan, suhu) VALUES ('$id_pasien', '$id_poli', '$id_dokter', '$tanggal', '$no_antrian', 'Menunggu', '$tensi', '$bb', '$tb', '$suhu')";
     if (mysqli_query($conn, $query)) {
         echo "<script>alert('Antrian berhasil ditambahkan! Nomor: $no_antrian'); window.location='antrian.php';</script>";
     } else {
@@ -173,6 +180,33 @@ if (isset($_GET['status']) && isset($_GET['id'])) {
                     ?>
                 </select>
             </div>
+
+            <div class="mb-4 border-t pt-4">
+                <h4 class="font-bold text-gray-700 mb-2">Tanda Vital (Awal)</h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Tensi (mmHg)</label>
+                        <input type="text" name="tensi" placeholder="120/80"
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Suhu (°C)</label>
+                        <input type="number" step="0.1" name="suhu" placeholder="36.5"
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Berat (kg)</label>
+                        <input type="number" name="bb" placeholder="60"
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Tinggi (cm)</label>
+                        <input type="number" name="tb" placeholder="170"
+                            class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                    </div>
+                </div>
+            </div>
+
             <div class="flex justify-end">
                 <button type="button" onclick="document.getElementById('modalAntrian').classList.add('hidden')"
                     class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">Batal</button>

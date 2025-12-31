@@ -1,4 +1,3 @@
-```php
 <?php
 session_start();
 // Cek Login
@@ -16,6 +15,52 @@ include '../sim_adhyaksa/layout_sidebar.php';
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-800">Pemeriksaan Pasien</h1>
     <p class="text-gray-600">Daftar antrian pasien hari ini (<?php echo date('d F Y'); ?>)</p>
+</div>
+
+<?php
+// Calculate Stats for Doctor
+$today = date('Y-m-d');
+$username = $_SESSION['username'];
+$user_check = mysqli_query($conn, "SELECT id FROM users WHERE username='$username'");
+$user = mysqli_fetch_assoc($user_check);
+$id_dokter = $user['id'];
+
+$count_menunggu = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM antrian WHERE tanggal='$today' AND id_dokter='$id_dokter' AND status='Menunggu'"));
+$count_diperiksa = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM antrian WHERE tanggal='$today' AND id_dokter='$id_dokter' AND status='Diperiksa'"));
+$count_selesai = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM antrian WHERE tanggal='$today' AND id_dokter='$id_dokter' AND status='Selesai'"));
+?>
+
+<!-- Doctor Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg p-5 shadow-sm border-l-4 border-gray-400 flex items-center justify-between">
+        <div>
+            <p class="text-gray-500 text-sm font-semibold uppercase">Menunggu</p>
+            <h3 class="text-2xl font-bold text-gray-700"><?php echo $count_menunggu; ?></h3>
+        </div>
+        <div class="bg-gray-100 p-3 rounded-full text-gray-500">
+            <i class="fas fa-hourglass-half text-xl"></i>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-5 shadow-sm border-l-4 border-yellow-500 flex items-center justify-between">
+        <div>
+            <p class="text-yellow-600 text-sm font-semibold uppercase">Sedang Diperiksa</p>
+            <h3 class="text-2xl font-bold text-yellow-700"><?php echo $count_diperiksa; ?></h3>
+        </div>
+        <div class="bg-yellow-100 p-3 rounded-full text-yellow-600">
+            <i class="fas fa-stethoscope text-xl"></i>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-5 shadow-sm border-l-4 border-green-500 flex items-center justify-between">
+        <div>
+            <p class="text-green-600 text-sm font-semibold uppercase">Selesai</p>
+            <h3 class="text-2xl font-bold text-green-700"><?php echo $count_selesai; ?></h3>
+        </div>
+        <div class="bg-green-100 p-3 rounded-full text-green-600">
+            <i class="fas fa-check-circle text-xl"></i>
+        </div>
+    </div>
 </div>
 
 <!-- Antrian Table -->

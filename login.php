@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Klinik Pratama Adhyaksa</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
     <style>
         body {
             font-family: sans-serif;
@@ -86,6 +87,11 @@
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">LOGIN</button>
         </form>
+
+        <div style="margin-top: 15px;">
+            <a href="index.php" style="text-decoration: none; color: #7f8c8d; font-size: 14px;">&larr; Kembali ke
+                Beranda</a>
+        </div>
     </div>
 
 </body>

@@ -123,6 +123,37 @@ include '../sim_adhyaksa/layout_sidebar.php';
 
     <!-- Exam Form -->
     <div class="lg:col-span-2">
+        <!-- Vital Signs Card -->
+        <div class="bg-white shadow-sm rounded-lg p-6 mb-6 border-l-4 border-yellow-500">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Tanda Vital (Pemeriksaan Awal)</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center p-3 bg-gray-50 rounded">
+                    <p class="text-xs text-gray-500">Tekanan Darah</p>
+                    <p class="font-bold text-xl text-gray-800">
+                        <?php echo !empty($data['tensi']) ? $data['tensi'] : '-'; ?></p>
+                    <span class="text-xs text-gray-400">mmHg</span>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded">
+                    <p class="text-xs text-gray-500">Suhu Tubuh</p>
+                    <p class="font-bold text-xl text-gray-800">
+                        <?php echo !empty($data['suhu']) ? $data['suhu'] : '-'; ?></p>
+                    <span class="text-xs text-gray-400">°C</span>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded">
+                    <p class="text-xs text-gray-500">Berat Badan</p>
+                    <p class="font-bold text-xl text-gray-800">
+                        <?php echo !empty($data['berat_badan']) ? $data['berat_badan'] : '-'; ?></p>
+                    <span class="text-xs text-gray-400">kg</span>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded">
+                    <p class="text-xs text-gray-500">Tinggi Badan</p>
+                    <p class="font-bold text-xl text-gray-800">
+                        <?php echo !empty($data['tinggi_badan']) ? $data['tinggi_badan'] : '-'; ?></p>
+                    <span class="text-xs text-gray-400">cm</span>
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white shadow-md rounded-lg p-6">
             <form method="POST">
                 <div class="mb-4">

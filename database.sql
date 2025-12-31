@@ -60,6 +60,15 @@ CREATE TABLE IF NOT EXISTS `rekam_medis` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `ulasan` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nama` varchar(100) NOT NULL,
+  `rating` int(1) NOT NULL,
+  `komentar` text NOT NULL,
+  `tanggal` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- TRUNCATE & RE-INSERT USERS with BCRYPT HASH (Default: admin123)
 TRUNCATE TABLE `users`;
 INSERT INTO `users` (`nama`, `username`, `password`, `role`) VALUES

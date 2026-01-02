@@ -11,12 +11,19 @@ if ($_SESSION['status'] != "login" || $_SESSION['role'] != "admin") {
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
     // Prevent deleting self
-    $cek = mysqli_query($conn, "SELECT username FROM users WHERE id='$id'");
-    $u = mysqli_fetch_assoc($cek);
+    // Prevent deleting self
+    $stmt_check = mysqli_prepare($conn, "SELECT username FROM users WHERE id=?");
+    mysqli_stmt_bind_param($stmt_check, "i", $id);
+    mysqli_stmt_execute($stmt_check);
+    $res_check = mysqli_stmt_get_result($stmt_check);
+    $u = mysqli_fetch_assoc($res_check);
+
     if ($u['username'] == $_SESSION['username']) {
         echo "<script>alert('Anda tidak bisa menghapus akun sendiri!'); window.location='manajemen_user.php';</script>";
     } else {
-        mysqli_query($conn, "DELETE FROM users WHERE id='$id'");
+        $stmt_del = mysqli_prepare($conn, "DELETE FROM users WHERE id=?");
+        mysqli_stmt_bind_param($stmt_del, "i", $id);
+        mysqli_stmt_execute($stmt_del);
         header("location:manajemen_user.php");
     }
 }
@@ -32,23 +39,29 @@ if (isset($_POST['submit'])) {
         $id = $_POST['id'];
         if (!empty($_POST['password'])) {
             $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $query = "UPDATE users SET nama='$nama', username='$username', password='$password', role='$role' WHERE id='$id'";
+            $stmt = mysqli_prepare($conn, "UPDATE users SET nama=?, username=?, password=?, role=? WHERE id=?");
+            mysqli_stmt_bind_param($stmt, "ssssi", $nama, $username, $password, $role, $id);
         } else {
-            $query = "UPDATE users SET nama='$nama', username='$username', role='$role' WHERE id='$id'";
+            $stmt = mysqli_prepare($conn, "UPDATE users SET nama=?, username=?, role=? WHERE id=?");
+            mysqli_stmt_bind_param($stmt, "sssi", $nama, $username, $role, $id);
         }
     } else {
         // Insert
         // Check duplicate username
-        $cek = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM users WHERE username='$username'"));
-        if ($cek > 0) {
+        $stmt_dup = mysqli_prepare($conn, "SELECT id FROM users WHERE username=?");
+        mysqli_stmt_bind_param($stmt_dup, "s", $username);
+        mysqli_stmt_execute($stmt_dup);
+        mysqli_stmt_store_result($stmt_dup);
+        if (mysqli_stmt_num_rows($stmt_dup) > 0) {
             echo "<script>alert('Username sudah digunakan!'); window.location='manajemen_user.php';</script>";
             exit;
         }
         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $query = "INSERT INTO users (nama, username, password, role) VALUES ('$nama', '$username', '$password', '$role')";
+        $stmt = mysqli_prepare($conn, "INSERT INTO users (nama, username, password, role) VALUES (?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "ssss", $nama, $username, $password, $role);
     }
 
-    if (mysqli_query($conn, $query)) {
+    if (mysqli_stmt_execute($stmt)) {
         header("location:manajemen_user.php");
     } else {
         echo "<script>alert('Gagal: " . mysqli_error($conn) . "');</script>";

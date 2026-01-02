@@ -21,27 +21,40 @@ try {
 
         if ($qty > 0 && !empty($id_obat)) {
             // 1. Check current stock
-            $stock_query = mysqli_query($conn, "SELECT stok, nama_obat FROM obat WHERE id_obat = '$id_obat'");
-            $stock_data = mysqli_fetch_assoc($stock_query);
+            // 1. Check current stock
+            $stmt_stock = mysqli_prepare($conn, "SELECT stok, nama_obat FROM obat WHERE id_obat = ?");
+            mysqli_stmt_bind_param($stmt_stock, "i", $id_obat);
+            mysqli_stmt_execute($stmt_stock);
+            $res_stock = mysqli_stmt_get_result($stmt_stock);
+            $stock_data = mysqli_fetch_assoc($res_stock);
 
             if ($stock_data['stok'] < $qty) {
                 throw new Exception("Stok obat " . $stock_data['nama_obat'] . " tidak cukup!");
             }
 
             // 2. Insert into resep_obat
-            $insert = mysqli_query($conn, "INSERT INTO resep_obat (id_rm, id_obat, jumlah) VALUES ('$id_rm', '$id_obat', '$qty')");
+            // 2. Insert into resep_obat
+            $stmt_insert = mysqli_prepare($conn, "INSERT INTO resep_obat (id_rm, id_obat, jumlah) VALUES (?, ?, ?)");
+            mysqli_stmt_bind_param($stmt_insert, "iii", $id_rm, $id_obat, $qty);
+            $insert = mysqli_stmt_execute($stmt_insert);
             if (!$insert)
                 throw new Exception(mysqli_error($conn));
 
             // 3. Deduct stock
-            $update = mysqli_query($conn, "UPDATE obat SET stok = stok - $qty WHERE id_obat = '$id_obat'");
+            // 3. Deduct stock
+            $stmt_update = mysqli_prepare($conn, "UPDATE obat SET stok = stok - ? WHERE id_obat = ?");
+            mysqli_stmt_bind_param($stmt_update, "ii", $qty, $id_obat);
+            $update = mysqli_stmt_execute($stmt_update);
             if (!$update)
                 throw new Exception(mysqli_error($conn));
         }
     }
 
     // 4. Update rekam_medis status
-    $update_rm = mysqli_query($conn, "UPDATE rekam_medis SET status_obat = 'Selesai' WHERE id_rm = '$id_rm'");
+    // 4. Update rekam_medis status
+    $stmt_rm = mysqli_prepare($conn, "UPDATE rekam_medis SET status_obat = 'Selesai' WHERE id_rm = ?");
+    mysqli_stmt_bind_param($stmt_rm, "i", $id_rm);
+    $update_rm = mysqli_stmt_execute($stmt_rm);
     if (!$update_rm)
         throw new Exception(mysqli_error($conn));
 

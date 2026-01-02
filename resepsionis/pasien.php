@@ -21,9 +21,10 @@ if (isset($_POST['submit'])) {
     $jenis_kelamin = $_POST['jenis_kelamin'];
     $no_bpjs = $_POST['no_bpjs'];
 
-    $query = "INSERT INTO pasien (no_rm, nik, nama_pasien, alamat, tanggal_lahir, jenis_kelamin, no_bpjs) VALUES ('$no_rm', '$nik', '$nama', '$alamat', '$tanggal_lahir', '$jenis_kelamin', '$no_bpjs')";
+    $stmt = mysqli_prepare($conn, "INSERT INTO pasien (no_rm, nik, nama_pasien, alamat, tanggal_lahir, jenis_kelamin, no_bpjs) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "sssssss", $no_rm, $nik, $nama, $alamat, $tanggal_lahir, $jenis_kelamin, $no_bpjs);
 
-    if (mysqli_query($conn, $query)) {
+    if (mysqli_stmt_execute($stmt)) {
         echo "<script>alert('Data pasien berhasil ditambahkan!'); window.location='pasien.php';</script>";
     } else {
         echo "<script>alert('Gagal menambahkan: " . mysqli_error($conn) . "');</script>";

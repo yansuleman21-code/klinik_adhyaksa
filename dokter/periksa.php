@@ -15,14 +15,18 @@ if (!isset($_GET['id'])) {
 $id_antrian = $_GET['id'];
 
 // Get Antrian & Pasien Data
-$query = mysqli_query($conn, "
+// Get Antrian & Pasien Data
+$stmt = mysqli_prepare($conn, "
     SELECT antrian.*, pasien.id_pasien, pasien.nama_pasien AS nama, pasien.no_rm, pasien.tanggal_lahir, pasien.jenis_kelamin, poli.nama_poli 
     FROM antrian 
     JOIN pasien ON antrian.id_pasien = pasien.id_pasien 
     JOIN poli ON antrian.id_poli = poli.id 
-    WHERE antrian.id = '$id_antrian'
+    WHERE antrian.id = ?
 ");
-$data = mysqli_fetch_assoc($query);
+mysqli_stmt_bind_param($stmt, "i", $id_antrian);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$data = mysqli_fetch_assoc($result);
 
 if (!$data) {
     echo "Data antrian tidak ditemukan.";
@@ -31,7 +35,9 @@ if (!$data) {
 
 // Update Status to 'Diperiksa' if currently 'Menunggu'
 if ($data['status'] == 'Menunggu') {
-    mysqli_query($conn, "UPDATE antrian SET status='Diperiksa' WHERE id='$id_antrian'");
+    $stmt_update = mysqli_prepare($conn, "UPDATE antrian SET status='Diperiksa' WHERE id=?");
+    mysqli_stmt_bind_param($stmt_update, "i", $id_antrian);
+    mysqli_stmt_execute($stmt_update);
 }
 
 // Handle Form Submit
@@ -41,23 +47,28 @@ if (isset($_POST['submit'])) {
     $id_dokter = 0; // Placeholder
 
     // Get logged in doctor ID
-    $check_user = mysqli_query($conn, "SELECT id FROM users WHERE username = '$_SESSION[username]'");
+    $stmt_user = mysqli_prepare($conn, "SELECT id FROM users WHERE username = ?");
+    mysqli_stmt_bind_param($stmt_user, "s", $_SESSION['username']);
+    mysqli_stmt_execute($stmt_user);
+    $check_user = mysqli_stmt_get_result($stmt_user);
     if ($u = mysqli_fetch_assoc($check_user)) {
         $id_dokter = $u['id'];
     }
 
     $tanggal = date('Y-m-d');
-    $keluhan = mysqli_real_escape_string($conn, $_POST['keluhan']);
-    $diagnosa = mysqli_real_escape_string($conn, $_POST['diagnosa']);
-    $resep = mysqli_real_escape_string($conn, $_POST['resep']);
+    $keluhan = $_POST['keluhan'];
+    $diagnosa = $_POST['diagnosa'];
+    $resep = $_POST['resep'];
 
     // Insert Rekam Medis
-    $insert = "INSERT INTO rekam_medis (id_pasien, id_dokter, id_poli, tanggal, keluhan, diagnosa, resep) 
-               VALUES ('$id_pasien', '$id_dokter', '$id_poli', '$tanggal', '$keluhan', '$diagnosa', '$resep')";
+    $stmt_insert = mysqli_prepare($conn, "INSERT INTO rekam_medis (id_pasien, id_dokter, id_poli, tanggal, keluhan, diagnosa, resep) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt_insert, "iiissss", $id_pasien, $id_dokter, $id_poli, $tanggal, $keluhan, $diagnosa, $resep);
 
-    if (mysqli_query($conn, $insert)) {
+    if (mysqli_stmt_execute($stmt_insert)) {
         // Update Antrian to Selesai
-        mysqli_query($conn, "UPDATE antrian SET status='Selesai' WHERE id='$id_antrian'");
+        $stmt_done = mysqli_prepare($conn, "UPDATE antrian SET status='Selesai' WHERE id=?");
+        mysqli_stmt_bind_param($stmt_done, "i", $id_antrian);
+        mysqli_stmt_execute($stmt_done);
         echo "<script>alert('Pemeriksaan Selesai!'); window.location='index.php';</script>";
     } else {
         echo "<script>alert('Gagal menyimpan: " . mysqli_error($conn) . "');</script>";
@@ -130,25 +141,29 @@ include '../sim_adhyaksa/layout_sidebar.php';
                 <div class="text-center p-3 bg-gray-50 rounded">
                     <p class="text-xs text-gray-500">Tekanan Darah</p>
                     <p class="font-bold text-xl text-gray-800">
-                        <?php echo !empty($data['tensi']) ? $data['tensi'] : '-'; ?></p>
+                        <?php echo !empty($data['tensi']) ? $data['tensi'] : '-'; ?>
+                    </p>
                     <span class="text-xs text-gray-400">mmHg</span>
                 </div>
                 <div class="text-center p-3 bg-gray-50 rounded">
                     <p class="text-xs text-gray-500">Suhu Tubuh</p>
                     <p class="font-bold text-xl text-gray-800">
-                        <?php echo !empty($data['suhu']) ? $data['suhu'] : '-'; ?></p>
+                        <?php echo !empty($data['suhu']) ? $data['suhu'] : '-'; ?>
+                    </p>
                     <span class="text-xs text-gray-400">°C</span>
                 </div>
                 <div class="text-center p-3 bg-gray-50 rounded">
                     <p class="text-xs text-gray-500">Berat Badan</p>
                     <p class="font-bold text-xl text-gray-800">
-                        <?php echo !empty($data['berat_badan']) ? $data['berat_badan'] : '-'; ?></p>
+                        <?php echo !empty($data['berat_badan']) ? $data['berat_badan'] : '-'; ?>
+                    </p>
                     <span class="text-xs text-gray-400">kg</span>
                 </div>
                 <div class="text-center p-3 bg-gray-50 rounded">
                     <p class="text-xs text-gray-500">Tinggi Badan</p>
                     <p class="font-bold text-xl text-gray-800">
-                        <?php echo !empty($data['tinggi_badan']) ? $data['tinggi_badan'] : '-'; ?></p>
+                        <?php echo !empty($data['tinggi_badan']) ? $data['tinggi_badan'] : '-'; ?>
+                    </p>
                     <span class="text-xs text-gray-400">cm</span>
                 </div>
             </div>

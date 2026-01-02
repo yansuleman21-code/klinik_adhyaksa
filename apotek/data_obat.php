@@ -10,7 +10,9 @@ if ($_SESSION['status'] != "login" || $_SESSION['role'] != "apoteker") {
 // Handle Delete
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-    mysqli_query($conn, "DELETE FROM obat WHERE id_obat='$id'");
+    $stmt = mysqli_prepare($conn, "DELETE FROM obat WHERE id_obat = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
     header("location:data_obat.php");
 }
 
@@ -23,9 +25,13 @@ if (isset($_POST['submit'])) {
 
     if ($_POST['id_obat'] != "") {
         $id = $_POST['id_obat'];
-        mysqli_query($conn, "UPDATE obat SET nama_obat='$nama', jenis_obat='$jenis', stok='$stok', harga='$harga' WHERE id_obat='$id'");
+        $stmt = mysqli_prepare($conn, "UPDATE obat SET nama_obat=?, jenis_obat=?, stok=?, harga=? WHERE id_obat=?");
+        mysqli_stmt_bind_param($stmt, "ssiii", $nama, $jenis, $stok, $harga, $id);
+        mysqli_stmt_execute($stmt);
     } else {
-        mysqli_query($conn, "INSERT INTO obat (nama_obat, jenis_obat, stok, harga) VALUES ('$nama', '$jenis', '$stok', '$harga')");
+        $stmt = mysqli_prepare($conn, "INSERT INTO obat (nama_obat, jenis_obat, stok, harga) VALUES (?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "ssii", $nama, $jenis, $stok, $harga);
+        mysqli_stmt_execute($stmt);
     }
     header("location:data_obat.php");
 }

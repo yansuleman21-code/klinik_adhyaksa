@@ -13,13 +13,16 @@ $password = $_POST['password'];
 $username = mysqli_real_escape_string($conn, $username);
 
 // Menyeleksi data user dengan username yang sesuai
-$query = mysqli_query($conn, "SELECT * FROM users WHERE username='$username'");
+$stmt = mysqli_prepare($conn, "SELECT * FROM users WHERE username = ?");
+mysqli_stmt_bind_param($stmt, "s", $username);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 
 // Menghitung jumlah data yang ditemukan
-$cek = mysqli_num_rows($query);
+$cek = mysqli_num_rows($result);
 
 if ($cek > 0) {
-    $row = mysqli_fetch_assoc($query);
+    $row = mysqli_fetch_assoc($result);
 
     // Verifikasi password dengan hash
     if (password_verify($password, $row['password'])) {
